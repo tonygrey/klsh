@@ -137,8 +137,10 @@ class HammingANN(HammingSearchBase):
         self._sort_indices = sort_indices
         self._unsort_indices = unsort_indices
         self._P_compact_sorted = P_compact_sorted
+        self._P_indices=P_indices
         return self
 
+  
     def query(self, X, k, return_dist=False):
         """Query a set of distances
 
@@ -148,7 +150,7 @@ class HammingANN(HammingSearchBase):
            an [n_samples, n_bits] array of hamming features. These will be
            interpreted as zeros and ones.
         """
-        X_compact = self._validate_input(X)
+        X_compact = self._validate_input(X, False)
 
         nbrs = np.zeros([X_compact.shape[0], k], dtype=int)
 
@@ -156,12 +158,14 @@ class HammingANN(HammingSearchBase):
             dist = np.zeros_like(nbrs)
 
         M, N = self._P_compact_sorted.shape
-
+        
+        X_compact=packbits_axis(X_compact[:,self._P_indices])
+        
         # TODO: MAKE THIS MORE EFFICIENT
         for i, val in enumerate(X_compact):
             # find ordered index within each random permutation
             P_indices = np.array([np.searchsorted(self._P_compact_sorted[j],
-                                                  val) for j in range(M)])
+                                                  val[j]) for j in range(M)])
 
             # get upper/lower indices within each permutation
             ind_uplo = np.clip(np.vstack([P_indices, P_indices + 1]), 0, N-1)
@@ -181,3 +185,4 @@ class HammingANN(HammingSearchBase):
             return nbrs, dist
         else:
             return nbrs
+         
