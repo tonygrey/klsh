@@ -150,16 +150,16 @@ class HammingANN(HammingSearchBase):
            an [n_samples, n_bits] array of hamming features. These will be
            interpreted as zeros and ones.
         """
-        X_compact = self._validate_input(X, False)
-
-        nbrs = np.zeros([X_compact.shape[0], k], dtype=int)
+        X = self._validate_input(X, False)
+        X_compact_original=packbits_axis(X)
+        nbrs = np.zeros([X.shape[0], k], dtype=int)
 
         if return_dist:
             dist = np.zeros_like(nbrs)
 
         M, N = self._P_compact_sorted.shape
         
-        X_compact=packbits_axis(X_compact[:,self._P_indices])
+        X_compact=packbits_axis(X[:,self._P_indices])
         
         # TODO: MAKE THIS MORE EFFICIENT
         for i, val in enumerate(X_compact):
@@ -175,7 +175,7 @@ class HammingANN(HammingSearchBase):
             ind_to_check = np.unique(self._sort_indices[range(M), ind_uplo])
 
             # compute hamming distances for these points, and put into results
-            distances = hamming_cdist(val, self._X_fit_compact[ind_to_check])
+            distances = hamming_cdist(X_compact_original[i], self._X_fit_compact[ind_to_check])
             nearest = np.argsort(distances[0])[:k]
             nbrs[i, :len(nearest)] = ind_to_check[nearest]
             if return_dist:
