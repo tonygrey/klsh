@@ -168,7 +168,7 @@ class HammingANN(HammingSearchBase):
                                                   val[j]) for j in range(M)])
 
             # get upper/lower indices within each permutation
-            ind_uplo = np.clip(np.vstack([P_indices, P_indices + 1]), 0, N-1)
+            ind_uplo = np.clip(np.vstack([P_indices-1, P_indices]), 0, N-1)
 
             # from indices within the sorted permutations, find the
             # unique set of indices from the original set of hashes
